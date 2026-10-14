@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="BlazingSailsESP.vcxproj" Id="ac8b76df-b894-4ce4-8238-7815f34aa693" />
+</Solution>

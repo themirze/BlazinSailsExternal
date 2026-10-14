@@ -1,0 +1,23 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+x64/
+Debug/
+Release/
+[Bb]in/
+[Oo]bj/
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.o
+
+# imgui runtime config
+imgui.ini
