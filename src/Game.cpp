@@ -1,7 +1,6 @@
 #include "Game.h"
 #include "Memory.h"
 #include <TlHelp32.h>
-#include <cstdio>
 #include <cmath>
 
 namespace Game {
@@ -57,8 +56,6 @@ namespace Game {
             CloseHandle(modSnap);
         }
 
-        printf("[Game] Attached. PID=%lu Base=0x%llX\n",
-            (unsigned long)processId, (unsigned long long)moduleBase);
         return true;
     }
 

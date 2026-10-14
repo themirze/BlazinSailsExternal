@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <cstdio>
 
 #pragma comment(lib, "windowscodecs.lib")
 
@@ -28,17 +27,17 @@ namespace Assets {
         { "QuadFlintlock",      "IC_quadflintlock" },
         { "DualQuadFlintlock",  "IC_doublequadflintlock" },
         { "DragonPistol",       "IC_dragon_pistol" },
-        { "HalfBarrel",         "IC_doublebarrel" },     // geçici
+        { "HalfBarrel",         "IC_doublebarrel" },
         { "BombLauncher",       "IC_bomblauncher" },
         { "BrokenBottle",       "IC_bottle" },
 
         // ===== Sandıklar =====
-        { "Lootcrate",          "lootcraft" },           // ★ typo senin PNG'nde
+        { "Lootcrate",          "lootcraft" },
         { "TreasureChest",      "Chest_Tier_1" },
-        { "AmmoBox",            "Ammobag" },             // ★ senin PNG adı
-        { "WoodCrate",          "NormalChest" },         // ★ senin PNG adı
-        { "WoodBarrel",         "TntBarrel" },           // geçici
-        { "CarryChest",         "NormalChest" },         // geçici
+        { "AmmoBox",            "Ammobag" },
+        { "WoodCrate",          "NormalChest" },
+        { "WoodBarrel",         "TntBarrel" },
+        { "CarryChest",         "NormalChest" },
         { "ExplosiveBarrel",    "TntBarrel" },
 
         // ===== Mermiler =====
@@ -47,13 +46,12 @@ namespace Assets {
         { "HeavyShot",          "HeavyCannoball" },
         { "CannonBalls",        "Cannonball" },
         { "FishAmmo",           "FishAmmo" },
-        { "AntiCannon",         "Cannonball_AntiCannon" },   // ★ YENİ
-        { "AntiSail",           "Cannonball_AntiSail" },     // ★ YENİ
-
+        { "AntiCannon",         "Cannonball_AntiCannon" },
+        { "AntiSail",           "Cannonball_AntiSail" },
 
         // ===== Upgrade'ler =====
         { "CannonUpgrade",      "CannonUpgrade" },
-        { "CapstanUpgrade",     "CapstonUpgrade" },      // ★ senin PNG'de typo
+        { "CapstanUpgrade",     "CapstonUpgrade" },
         { "PumpUpgrade",        "IC_pump_upgrade" },
         { "CorkUpgrade",        "ICC_CorkUpgrade" },
         { "SteeringWheelUpgrade","SteeringWheelUpgrade" },
@@ -138,8 +136,6 @@ namespace Assets {
 
     // ===== Tüm ikonları yükle =====
     void Init(ID3D11Device* device, const std::string& iconFolder) {
-        int loaded = 0, failed = 0;
-
         for (const auto& kv : ICON_MAP) {
             const std::string& className = kv.first;
             const std::string& fileName = kv.second;
@@ -152,16 +148,8 @@ namespace Assets {
             auto* srv = LoadPng(device, path);
             if (srv) {
                 g_icons[className] = srv;
-                loaded++;
-            }
-            else {
-                failed++;
-                printf("[ASSETS] FAILED: %s -> %s.png\n",
-                    className.c_str(), fileName.c_str());
             }
         }
-
-        printf("[ASSETS] Loaded %d icons (%d failed)\n", loaded, failed);
     }
 
     void Shutdown() {

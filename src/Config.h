@@ -10,7 +10,6 @@ namespace Config {
     inline bool espName = true;
     inline bool espDistance = true;
     inline bool espHealth = true;
-    inline bool espSnapline = false;
     inline bool espTeam = false;
     inline bool espDead = false;
     inline float espMaxDistance = 500.0f;
@@ -34,26 +33,23 @@ namespace Config {
     inline float colorTeam[4] = { 0.2f, 1.0f, 0.2f, 1.0f };
     inline float colorText[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    // ===== AIMBOT =====
-    inline bool aimEnabled = false;
-
-    // AIMLOCK
+    // ===== AIMLOCK =====
     inline bool aimlockEnabled = false;
     inline bool aimlockOnRightMouse = true;
-    inline float aimlockSmooth = 5.0f;      // 1 = instant, 20 = çok yumuşak
     inline bool aimlockOnLeftMouse = false;
+    inline bool aimlockOnCtrl = false;
+    inline bool aimlockOnShift = false;
+    inline bool aimlockOnAlt = false;
+    inline float aimlockSmooth = 5.0f;      // 1 = instant, 20 = çok yumuşak
     inline float aimlockMaxStep = 15.0f;    // max piksel/frame
-    inline bool aimlockOnCtrl = false;         // ★ YENİ
-    inline bool aimlockOnShift = false;        // ★ YENİ
-    inline bool aimlockOnAlt = false;          // ★ YENİ
 
-    // MAGIC BULLET
+    // ===== MAGIC BULLET =====
     inline bool magicEnabled = false;
     inline bool magicOnLeftMouse = true;
     inline bool magicOnRightMouse = false;
-    inline float magicSmooth = 1.0f;        // 1 = anlık (önerilen)
+    inline float magicSmooth = 1.0f;
 
-    // Ortak
+    // ===== Ortak aim =====
     inline bool aimDrawFOV = true;
     inline float aimFOV = 120.0f;
     inline bool aimTeam = false;
@@ -64,16 +60,14 @@ namespace Config {
 
     // ===== TRIGGERBOT =====
     inline bool triggerEnabled = false;
-    inline bool triggerOnRightMouse = true;    // Sağ tık (ADS) → aktif
-    inline bool triggerOnCtrl = false;         // ★ YENİ
-    inline bool triggerOnShift = false;        // ★ YENİ
-    inline bool triggerOnLeftMouse = false;    // Kaldırıldı ama uyumluluk için
-    inline int triggerDelayMs = 0;             // ★ 0 = delay yok
+    inline bool triggerOnRightMouse = true; // Sağ tık (ADS) → aktif
+    inline bool triggerOnCtrl = false;
+    inline bool triggerOnShift = false;
+    inline int triggerDelayMs = 0;
     inline float triggerFOV = 8.0f;
     inline bool triggerHeadOnly = false;
 
-    // True magic bullet (ileride kullanılacak)
+    // ===== Write-based magic bullet =====
     inline bool magicWriteEnabled = false;
     inline int magicWriteCooldownMs = 500;
-    inline bool magicWriteDebug = false;
 }

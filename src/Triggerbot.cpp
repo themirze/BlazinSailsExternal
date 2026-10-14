@@ -14,7 +14,7 @@ namespace Triggerbot {
     static bool  s_mouseDown = false;
     static DWORD s_mouseDownAt = 0;
 
-    // ★ Basılı tut → ateş et, 40ms sonra bırak (oyun input okuması için)
+    // Basılı tut → ateş et, 40ms sonra bırak (oyun input okuması için)
     static void FireOnce() {
         if (s_mouseDown) return;
 
@@ -39,7 +39,7 @@ namespace Triggerbot {
         }
     }
 
-    // ★ Çoklu tetik kontrolü (sol tık hariç)
+    // Çoklu tetik kontrolü (sol tık hariç)
     static bool IsActivationKeyDown() {
         if (Config::triggerOnRightMouse && (GetAsyncKeyState(VK_RBUTTON) & 0x8000)) return true;
         if (Config::triggerOnCtrl && (GetAsyncKeyState(VK_CONTROL) & 0x8000)) return true;
@@ -68,7 +68,7 @@ namespace Triggerbot {
     }
 
     void Update() {
-        // ★ Önce bekleyen mouse-up işlemini yap
+        // Önce bekleyen mouse-up işlemini yap
         UpdateMouseRelease();
 
         if (!Config::triggerEnabled) return;

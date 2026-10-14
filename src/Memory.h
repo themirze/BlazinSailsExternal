@@ -4,7 +4,7 @@
 #include <string>
 
 namespace Memory {
-    extern HANDLE hProcess;   // ← extern olmalı!
+    extern HANDLE hProcess;
 
     template<typename T>
     T Read(uintptr_t address) {

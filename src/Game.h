@@ -7,7 +7,6 @@
 
 namespace Game {
     // Process
-    extern HANDLE hProcess;
     extern uintptr_t moduleBase;
     extern DWORD processId;
 

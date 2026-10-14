@@ -17,7 +17,7 @@ namespace MagicBullet {
         return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
     }
 
-    // ★ DİKKAT: WriteProcessMemory — EAC TESPİT EDER
+    // WriteProcessMemory kullanımı anti-cheat tarafından tespit edilebilir.
     static bool WriteFVector(uintptr_t address, const FVector& v) {
         if (!Memory::hProcess) return false;
         SIZE_T written = 0;
@@ -27,30 +27,6 @@ namespace MagicBullet {
             &v, sizeof(FVector),
             &written);
         return ok && written == sizeof(FVector);
-    }
-
-    // ★ DİKKAT: WriteProcessMemory — EAC TESPİT EDER
-    static bool WriteRotator(uintptr_t address, const FRotator& r) {
-        if (!Memory::hProcess) return false;
-        SIZE_T written = 0;
-        BOOL ok = WriteProcessMemory(
-            Memory::hProcess,
-            (LPVOID)address,
-            &r, sizeof(FRotator),
-            &written);
-        return ok && written == sizeof(FRotator);
-    }
-
-    // Hedefin rotation'unu hesapla (kendi konumundan hedefe doğru)
-    static FRotator CalcRotation(const FVector& from, const FVector& to) {
-        FVector d = to - from;
-        const float R2D = 180.0f / 3.1415926535897932f;
-
-        FRotator rot;
-        rot.Pitch = atan2f(-d.Z, sqrtf(d.X * d.X + d.Y * d.Y)) * R2D;
-        rot.Yaw = atan2f(d.Y, d.X) * R2D;
-        rot.Roll = 0.0f;
-        return rot;
     }
 
     // Hedefi bul
@@ -103,7 +79,7 @@ namespace MagicBullet {
         return found;
     }
 
-    // ★ ANA FONKSİYON — Yeni ateş algılanınca projectile rotation'ını yaz
+    // Yeni ateş algılanınca projectile velocity'sini hedefe yönlendir
     bool Update() {
         if (!Config::magicWriteEnabled) return false;
         if (!Game::IsAttached() || !Game::GWorld) return false;
@@ -116,11 +92,9 @@ namespace MagicBullet {
         }
         s_prevFire = true;
 
-        // Cooldown (ban riskini azaltmak için)
+        // Cooldown
         DWORD now = GetTickCount();
         if (now - s_lastWrite < (DWORD)Config::magicWriteCooldownMs) {
-            if (Config::magicWriteDebug)
-                printf("[MB] Cooldown — atlandı\n");
             return false;
         }
 
@@ -135,23 +109,7 @@ namespace MagicBullet {
         uintptr_t targetActor;
         if (!FindTarget(chars, pov, target, targetActor)) return false;
 
-        // ★ Projectile'ı bul (World'de yeni spawn olan projectile)
-        // Bu, YENİ spawn olan projectile'ı aramak demektir.
-        // Bu kısmı CE ile offset bulman gerek — aşağıda UYARI var.
-
-        // ⚠️⚠️⚠️ AŞAĞIDAKİ KOD SADECE ÖRNEK — GERÇEK OFFSET BULUNMALI ⚠️⚠️⚠️
-        //
-        // UE5'te projectile spawn olduğunda:
-        //   - Actor listesine eklenir
-        //   - RootComponent + RelativeLocation = spawn pozisyonu
-        //   - ProjectileMovementComponent + Velocity = hareket yönü
-        //
-        // Doğru offset Cheat Engine ile bulunmalı:
-        //   ProjectileMovementComponent offset from actor = ?
-        //   Velocity offset from PMC = ?
-        //
-        // Aşağıdaki örnek: en yakın projectile'ı bulup velocity'sini değiştir
-
+        // Yeni spawn olan projectile'ı bul
         uintptr_t level = Memory::Read<uintptr_t>(Game::GWorld + 0x30);
         if (!level) return false;
 
@@ -164,7 +122,7 @@ namespace MagicBullet {
 
         // En yakın projectile'ı bul
         uintptr_t bestProjectile = 0;
-        float bestDist = 500.0f;   // 5 metre içinde
+        float bestDist = 500.0f;
 
         for (int i = 0; i < count; i++) {
             uintptr_t actor = Memory::Read<uintptr_t>(data + (uintptr_t)i * 8);
@@ -176,7 +134,6 @@ namespace MagicBullet {
             int32_t classIdx = Memory::Read<int32_t>(cp + 0x18);
             std::string className = UE4::ReadFName(Game::GNames, classIdx);
 
-            // Projectile class'ı mı?
             if (className.find("Projectile") == std::string::npos) continue;
 
             uintptr_t root = Memory::Read<uintptr_t>(actor + 0x130);
@@ -190,52 +147,32 @@ namespace MagicBullet {
             }
         }
 
-        if (!bestProjectile) {
-            if (Config::magicWriteDebug)
-                printf("[MB] Projectile bulunamadı\n");
-            return false;
-        }
+        if (!bestProjectile) return false;
 
-        // ★ Rotation hesapla (projectile'dan hedefe)
         FVector projPos = Memory::Read<FVector>(
             Memory::Read<uintptr_t>(bestProjectile + 0x130) + 0x11C);
 
-        FRotator newRot = CalcRotation(projPos, target);
-
-        // ⚠️⚠️⚠️ OFFSET BULUNMALI: ProjectileMovementComponent offset ⚠️⚠️⚠️
-        //
-        // Bu offset CE ile bulunmalı. Örnek: actor + 0x2A8 (tahmini)
-        // Ve Velocity offset: PMC + 0xXX
-
-        const uintptr_t PMC_OFFSET = 0x908;    // ← DEĞİŞTİR (CE ile bul)
-        const uintptr_t VELOCITY_OFFSET = 0xc4; // ← DEĞİŞTİR
+        // ProjectileMovementComponent ve Velocity offsetleri
+        const uintptr_t PMC_OFFSET = 0x908;
+        const uintptr_t VELOCITY_OFFSET = 0xc4;
 
         uintptr_t pmc = Memory::Read<uintptr_t>(bestProjectile + PMC_OFFSET);
         if (!pmc) return false;
 
-        // Hedefe doğru velocity hesapla
+        // Hedefe doğru velocity hesapla (yön değişir, hız korunur)
         FVector dir = target - projPos;
-        dir = dir * (1.0f / dir.Length());   // normalize
+        dir = dir * (1.0f / dir.Length());
 
-        // Hız büyüklüğünü koru (velocity magnitude değiştirme, sadece yön)
         FVector curVel = Memory::Read<FVector>(pmc + VELOCITY_OFFSET);
         float speed = curVel.Length();
-        if (speed < 1.0f) speed = 3000.0f;   // default
+        if (speed < 1.0f) speed = 3000.0f;
 
         FVector newVel = dir * speed;
 
-        // ★ MEMORY WRITE — EAC TESPİT EDER
         bool ok = WriteFVector(pmc + VELOCITY_OFFSET, newVel);
 
         if (ok) {
             s_lastWrite = now;
-            if (Config::magicWriteDebug)
-                printf("[MB] ✓ Projectile yönlendirildi: dist=%.1f speed=%.0f\n",
-                    bestDist, speed);
-        }
-        else {
-            if (Config::magicWriteDebug)
-                printf("[MB] ✗ Write başarısız\n");
         }
 
         return ok;

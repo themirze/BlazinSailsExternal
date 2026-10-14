@@ -5,8 +5,6 @@
 
 namespace Menu {
 
-    bool open = true;
-
     namespace {
         int   tab = 0;
         float uiScale = 1.f;
@@ -21,7 +19,7 @@ namespace Menu {
             return clicked;
         }
 
-        // ★ Ayrı fonksiyonlar — her biri tek iş yapar
+        // Ayrı fonksiyonlar — her biri tek iş yapar
         void SliderF(const char* id, float* v, float lo, float hi, const char* fmt) {
             ImGui::SetNextItemWidth(-FLT_MIN);
             ImGui::SliderFloat(id, v, lo, hi, fmt);
@@ -40,7 +38,6 @@ namespace Menu {
             Theme::Toggle("Name", &Config::espName);
             Theme::Toggle("Distance", &Config::espDistance);
             Theme::Toggle("Health", &Config::espHealth);
-            Theme::Toggle("Snaplines", &Config::espSnapline);
             Theme::Toggle("Show team", &Config::espTeam);
             Theme::Toggle("Show dead", &Config::espDead);
             SliderF("##maxdist", &Config::espMaxDistance, 50.f, 2000.f, "Max distance: %.0f m");

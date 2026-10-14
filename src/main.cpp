@@ -11,8 +11,7 @@
 #include "Config.h"
 #include "Offsets.h"
 #include "UE4.h"
-#include "Assets.h"      // ★ YENİ
-#include <cstdio>
+#include "Assets.h"
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -23,9 +22,6 @@ static ID3D11DeviceContext* g_pContext = nullptr;
 static IDXGISwapChain* g_pSwapChain = nullptr;
 static ID3D11RenderTargetView* g_pRenderTargetView = nullptr;
 static bool                     g_Running = true;
-
-// ===== Debug flag =====
-static bool g_DebugPrinted = false;
 
 // ===== D3D11 init =====
 static bool InitD3D11(HWND hWnd) {
@@ -70,12 +66,11 @@ static void InitImGui() {
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.ConfigDebugHighlightIdConflicts = false;
 
-    Menu::Init();   // Tema
+    Menu::Init();
 
     ImGui_ImplWin32_Init(Overlay::hwnd);
     ImGui_ImplDX11_Init(g_pDevice, g_pContext);
 
-    // ★ PNG ikonlarını yükle
     Assets::Init(g_pDevice, "C:\\BlazingSailsESP\\assets\\icons");
 }
 
@@ -133,25 +128,6 @@ static void MainLoop() {
                 Game::ReadGlobals();
                 lastGlobalRead = now;
             }
-
-            // ===== DEBUG PRINT (sadece 1 kez) =====
-            if (!g_DebugPrinted) {
-                FMinimalViewInfo dbgPov;
-                if (Game::ReadCamera(dbgPov)) {
-                    printf("\n=== DEBUG INFO (1 kez) ===\n");
-                    printf("Module Base: 0x%llX\n", (unsigned long long)Game::moduleBase);
-                    printf("GWorld:      0x%llX\n", (unsigned long long)Game::GWorld);
-                    printf("PCM:         0x%llX\n", (unsigned long long)Game::cameraManager);
-                    printf("localPawn:   0x%llX\n", (unsigned long long)Game::localPawn);
-                    printf("POV: X=%.2f Y=%.2f Z=%.2f\n",
-                        dbgPov.Location.X, dbgPov.Location.Y, dbgPov.Location.Z);
-                    printf("ROT: Pitch=%.2f Yaw=%.2f Roll=%.2f\n",
-                        dbgPov.Rotation.Pitch, dbgPov.Rotation.Yaw, dbgPov.Rotation.Roll);
-                    printf("FOV: %.2f  DesiredFOV: %.2f\n", dbgPov.FOV, dbgPov.DesiredFOV);
-                    printf("==========================\n\n");
-                    g_DebugPrinted = true;
-                }
-            }
         }
 
         // ===== IMGUI =====
@@ -179,13 +155,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     _In_ LPSTR lpCmdLine,
     _In_ int nCmdShow) {
 
-    AllocConsole();
-    FILE* f;
-    freopen_s(&f, "CONOUT$", "w", stdout);
-    freopen_s(&f, "CONOUT$", "w", stderr);
-    printf("=== Blazing Sails ESP ===\n");
-    printf("Console initialized.\n");
-
     if (!Overlay::Create(hInstance)) {
         MessageBoxA(nullptr, "Overlay olusturulamadi", "Hata", MB_OK);
         return 1;
@@ -198,7 +167,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
 
     MainLoop();
 
-    // ★ Kapanışta Assets'i temizle
     Assets::Shutdown();
 
     Game::Detach();
@@ -210,9 +178,6 @@ int APIENTRY WinMain(_In_ HINSTANCE hInstance,
     if (g_pContext)          g_pContext->Release();
     if (g_pDevice)           g_pDevice->Release();
     Overlay::Destroy();
-
-    if (f) fclose(f);
-    FreeConsole();
 
     return 0;
 }

@@ -16,11 +16,11 @@ struct FVector {
     FVector operator+(const FVector& v) const {
         return FVector(X + v.X, Y + v.Y, Z + v.Z);
     }
-    // ★ YENİ: Skaler çarpma
+    // Skaler çarpma
     FVector operator*(float s) const {
         return FVector(X * s, Y * s, Z * s);
     }
-    // ★ YENİ: Skaler bölme
+    // Skaler bölme
     FVector operator/(float s) const {
         if (s == 0.0f) return FVector();
         return FVector(X / s, Y / s, Z / s);
@@ -33,7 +33,7 @@ struct FVector {
         return sqrtf(X * X + Y * Y + Z * Z);
     }
 
-    // ★ YENİ: Cross product
+    // Cross product
     FVector Cross(const FVector& v) const {
         return FVector(
             Y * v.Z - Z * v.Y,
@@ -42,7 +42,7 @@ struct FVector {
         );
     }
 
-    // ★ YENİ: Normalize
+    // Normalize
     FVector Normalized() const {
         float len = Length();
         if (len < 0.0001f) return FVector();

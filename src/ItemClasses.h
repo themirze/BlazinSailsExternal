@@ -43,8 +43,8 @@ namespace ItemClasses {
         {"BP_PickupHeavyShot_C",              "HeavyShot"},
         {"BP_PickupCannonBalls_C",            "CannonBalls"},
         {"BP_PickupFishAmmo_C",               "FishAmmo"},
-        {"BP_PickupAntiCannon_C",             "AntiCannon"},   // ★ YENİ
-        {"BP_PickupAntiSail_C",               "AntiSail"},     // ★ YENİ
+        {"BP_PickupAntiCannon_C",             "AntiCannon"},
+        {"BP_PickupAntiSail_C",               "AntiSail"},
 
 
         // ===== Upgrade'ler =====
@@ -88,8 +88,6 @@ namespace ItemClasses {
         return "[ITEM]";
     }
 
-    inline const char* GetIcon(int32_t /*idx*/) { return "[ITEM]"; }
-
     // ===== Kategoriler =====
     enum class Category {
         Chest, Weapon, Ammo, Barrel, Upgrade,
@@ -125,8 +123,8 @@ namespace ItemClasses {
         if (name.find("HeavyShot") != std::string::npos) return Category::Ammo;
         if (name.find("CannonBalls") != std::string::npos) return Category::Ammo;
         if (name.find("FishAmmo") != std::string::npos) return Category::Ammo;
-        if (name.find("AntiCannon") != std::string::npos) return Category::Ammo;   // ★ YENİ
-        if (name.find("AntiSail") != std::string::npos) return Category::Ammo;     // ★ YENİ
+        if (name.find("AntiCannon") != std::string::npos) return Category::Ammo;
+        if (name.find("AntiSail") != std::string::npos) return Category::Ammo;
 
         if (name.find("Barrel") != std::string::npos) return Category::Barrel;
 

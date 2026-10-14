@@ -1,13 +1,11 @@
 #include "Actors.h"
 #include "Game.h"
-#include <cmath> 
+#include <cmath>
 #include "Memory.h"
 #include "ItemClasses.h"
 #include "Offsets.h"
-#include <cstdio>
 #include <cstring>
 #include <unordered_map>
-#include <algorithm>
 
 #include "UE4.h"
 
@@ -105,7 +103,7 @@ namespace Actors {
     }
 
     // ============================================================
-    // Item'ları topla (500ms cache + tek seferlik class tarama debug)
+    // Item'ları topla (500ms cache)
     // ============================================================
     std::vector<Item> GetItems() {
         std::vector<Item> result;
@@ -117,71 +115,6 @@ namespace Actors {
         uintptr_t data = Memory::Read<uintptr_t>(level + 0x98);
         int32_t count = Memory::Read<int32_t>(level + 0xA0);
         if (!data || count <= 0 || count > 100000) return result;
-
-    // ============================================================
-    // ★★★ DEBUG: TÜM BENZERSİZ CLASS İSİMLERİNİ LİSTELE ★★★
-    // ============================================================
-    static bool s_dumpedClasses = false;
-    static bool s_dumpKeyPressed = false;
-
-    // F8'e basıldığında yeniden listele
-    bool f8Down = (GetAsyncKeyState(VK_F8) & 0x8000) != 0;
-
-    if (!s_dumpedClasses || (f8Down && !s_dumpKeyPressed)) {
-        s_dumpKeyPressed = f8Down;
-
-        printf("\n");
-        printf("=====================================================================\n");
-        printf("  TUM BENZERSIZ ACTOR CLASS ISIMLERI (F8 = yenile)\n");
-        printf("=====================================================================\n");
-
-        std::unordered_map<std::string, int> uniqueClasses;
-
-        for (int i = 0; i < count; i++) {
-            uintptr_t actor = Memory::Read<uintptr_t>(data + (uintptr_t)i * 8);
-            if (!actor || actor < 0x10000) continue;
-
-            uintptr_t cp = Memory::Read<uintptr_t>(actor + 0x10);
-            if (!cp) continue;
-
-            int32_t idx = Memory::Read<int32_t>(cp + 0x18);
-            std::string className = UE4::ReadFName(Game::GNames, idx);
-
-            if (className.empty() || className == "?") continue;
-            if (className.length() > 80) continue;
-
-            // Sadece BP_ / ABP_ / Pickup / Item içerenler
-            // (bu filtreyi kaldırırsan 1000+ class basar)
-            bool interesting =
-                className.find("BP_") == 0 ||
-                className.find("ABP_") == 0 ||
-                className.find("Pickup") != std::string::npos ||
-                className.find("Item") != std::string::npos ||
-                className.find("Weapon") != std::string::npos;
-
-            if (interesting) {
-                uniqueClasses[className]++;
-            }
-        }
-
-        // İsme göre sıralı yazdır
-        std::vector<std::pair<std::string, int>> sorted(
-            uniqueClasses.begin(), uniqueClasses.end());
-        std::sort(sorted.begin(), sorted.end(),
-            [](const auto& a, const auto& b) { return a.first < b.first; });
-
-        int itemCandidateCount = 0;
-        for (const auto& kv : sorted) {
-            printf("  %-55s (x%d)\n", kv.first.c_str(), kv.second);
-            itemCandidateCount++;
-        }
-
-        printf("=====================================================================\n");
-        printf("  TOPLAM: %d benzersiz class  (F8 = yenile)\n", itemCandidateCount);
-        printf("=====================================================================\n\n");
-
-        s_dumpedClasses = true;
-    }
 
         DWORD now = GetTickCount();
         if (now - s_lastItemScan > 500) {
@@ -196,7 +129,7 @@ namespace Actors {
                 int32_t idx = Memory::Read<int32_t>(cp + 0x18);
                 const std::string& className = GetCachedClassName(idx);
 
-                // ★ Sadece class ismi tabanlı
+                // Sadece class ismi tabanlı
                 const char* name = ItemClasses::GetNameFromClassName(className);
                 if (!name) continue;
 
@@ -231,70 +164,5 @@ namespace Actors {
             result.push_back(it);
         }
         return result;
-    }
-
-    // ============================================================
-    // ★ GEÇİCİ DEBUG: Projectile + PMC offset bulma (tek F9)
-    // ============================================================
-    void DumpProjectiles() {
-        printf("\n[DUMP] F9 BASILDI!\n");
-        if (!Game::GWorld) return;
-
-        uintptr_t level = Memory::Read<uintptr_t>(Game::GWorld + 0x30);
-        if (!level) return;
-
-        uintptr_t data = Memory::Read<uintptr_t>(level + 0x98);
-        int32_t count = Memory::Read<int32_t>(level + 0xA0);
-        if (!data || count <= 0) return;
-
-        int projCount = 0;
-
-        for (int i = 0; i < count; i++) {
-            uintptr_t actor = Memory::Read<uintptr_t>(data + (uintptr_t)i * 8);
-            if (!actor || actor < 0x10000) continue;
-
-            uintptr_t cp = Memory::Read<uintptr_t>(actor + 0x10);
-            if (!cp) continue;
-
-            int32_t classIdx = Memory::Read<int32_t>(cp + 0x18);
-            std::string className = UE4::ReadFName(Game::GNames, classIdx);
-
-            if (className.find("Projectile") == std::string::npos) continue;
-            if (className.find("Trail") != std::string::npos) continue;
-
-            printf("\n=====================================================================\n");
-            printf("[PROJ] actor=0x%llX class=%s\n",
-                (unsigned long long)actor, className.c_str());
-            printf("=====================================================================\n");
-            printf("TUM POINTER'LAR ve CLASS ISIMLERI:\n\n");
-
-            for (int off = 0x100; off < 0x2000; off += 8) {
-                uintptr_t ptr = Memory::Read<uintptr_t>(actor + off);
-                if (ptr < 0x10000000000 || ptr > 0x7FFFFFFFFFFF) continue;
-
-                // Pointer'ın class ismini oku
-                uintptr_t ptrClass = Memory::Read<uintptr_t>(ptr + 0x10);
-                std::string ptrClassName = "?";
-                if (ptrClass) {
-                    int32_t pcIdx = Memory::Read<int32_t>(ptrClass + 0x18);
-                    ptrClassName = UE4::ReadFName(Game::GNames, pcIdx);
-                }
-
-                // İlk birkaç float'ı da oku (velocity olup olmadığını görmek için)
-                float v_c4_x = Memory::Read<float>(ptr + 0xc4);
-                float v_c4_y = Memory::Read<float>(ptr + 0xc4 + 4);
-                float v_c4_z = Memory::Read<float>(ptr + 0xc4 + 8);
-
-                printf("  actor+0x%04X -> 0x%llX  [%s]  | +0xc4=(%.1f, %.1f, %.1f)\n",
-                    off, (unsigned long long)ptr, ptrClassName.c_str(),
-                    v_c4_x, v_c4_y, v_c4_z);
-            }
-
-            printf("\n");
-            projCount++;
-            if (projCount >= 1) break;   // sadece 1 projectile yeter
-        }
-
-        printf("=== TOTAL %d PROJECTILES ===\n\n", projCount);
     }
 }

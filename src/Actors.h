@@ -26,5 +26,4 @@ namespace Actors {
 
     std::vector<Character> GetCharacters();
     std::vector<Item> GetItems();
-    void DumpProjectiles();
 }

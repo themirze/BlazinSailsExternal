@@ -63,14 +63,14 @@ namespace ESP {
             const float ICON_SIZE = 28.0f;
 
             if (srv) {
-                // ★ PNG ikonu çiz
+                // PNG ikonu çiz
                 ImVec2 iconMin(sp.x - ICON_SIZE / 2.0f,
                     sp.y - ICON_SIZE / 2.0f);
                 ImVec2 iconMax(sp.x + ICON_SIZE / 2.0f,
                     sp.y + ICON_SIZE / 2.0f);
                 dl->AddImage((ImTextureID)(intptr_t)srv, iconMin, iconMax);
 
-                // ★ Pill-style mesafe etiketi
+                // Pill-style mesafe etiketi
                 if (hasLocalPos) {
                     Draw::DistanceLabel(dl,
                         ImVec2(sp.x + ICON_SIZE / 2.0f + 6.0f,
@@ -79,7 +79,7 @@ namespace ESP {
                 }
             }
             else {
-                // ★ İkon yoksa: nokta + text
+                // İkon yoksa: nokta + text
                 Draw::Dot(dl, sp, color, 3.0f);
 
                 char buf[128] = {};

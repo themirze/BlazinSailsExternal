@@ -18,17 +18,17 @@ namespace ESP {
         for (const auto& ch : list) {
             if (!ch.rootComponent) continue;
 
-            // ★ Takım filtresi
+            // Takım filtresi
             if (!Config::espTeam && !ch.isEnemy && !ch.isLocalPlayer)
                 continue;
 
-            // ★ Ölü filtresi
+            // Ölü filtresi
             if (!Config::espDead && ch.isDead) continue;
 
             FVector world = Memory::Read<FVector>(
                 ch.rootComponent + Offsets::Scene_RelativeLocation);
 
-            // ★ Mesafe filtresi
+            // Mesafe filtresi
             if (hasLocalPos && !ch.isLocalPlayer) {
                 FVector d = world - localPos;
                 float dist = d.Length() / 100.0f;
@@ -62,12 +62,12 @@ namespace ESP {
             else
                 color = IM_COL32(50, 255, 50, 255);
 
-            // ★ Kutu
+            // Kutu
             if (Config::espBox) {
                 Draw::Box(dl, tl, br, color, Config::espBoxThickness);
             }
 
-            // ★ İsim
+            // İsim
             if (Config::espName && ch.name[0] != '\0' &&
                 strcmp(ch.name, "Unknown") != 0) {
                 ImVec2 nameSize = ImGui::CalcTextSize(ch.name);
@@ -75,7 +75,7 @@ namespace ESP {
                 Draw::TextBgBold(dl, namePos, color, ch.name);
             }
 
-            // ★ Mesafe
+            // Mesafe
             if (Config::espDistance && hasLocalPos && !ch.isLocalPlayer) {
                 FVector d = world - localPos;
                 float dist = d.Length() / 100.0f;
@@ -89,7 +89,7 @@ namespace ESP {
                 Draw::DistanceLabel(dl, distPos, dist);
             }
 
-            // ★ Sağlık
+            // Sağlık
             if (Config::espHealth && ch.maxHealth > 0.0f) {
                 float r = ch.health / ch.maxHealth;
                 if (r < 0.0f) r = 0.0f;

@@ -13,7 +13,6 @@
 #include "MagicBullet.h"
 #include <Windows.h>
 #include <imgui.h>
-#include <cstdio>
 
 namespace ESP {
 
@@ -88,15 +87,6 @@ namespace ESP {
 
         // Oyun ön planda değilse ve menü kapalıysa hiç çizme
         if (!shouldShow) return;
-
-        // ★★★ GEÇİCİ DEBUG: F9 ile projectile dump ★★★
-        static bool s_f9Pressed = false;
-        bool f9Down = (GetAsyncKeyState(VK_F9) & 0x8000) != 0;
-        if (f9Down && !s_f9Pressed) {
-            Actors::DumpProjectiles();
-        }
-        s_f9Pressed = f9Down;
-        // ★★★ DEBUG SONU ★★★
 
         // ===== ESP görünürlük kontrolü =====
         if (!Config::espEnabled) return;

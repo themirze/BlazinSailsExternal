@@ -32,9 +32,7 @@ namespace Aimbot {
         return (GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0;
     }
 
-    // ============================================================
-    // ★ Aimlock tetik kontrolü (çoklu tuş)
-// ============================================================
+    // Aimlock tetik kontrolü (çoklu tuş)
     static bool IsAimlockTriggerDown() {
         if (Config::aimlockOnRightMouse && (GetAsyncKeyState(VK_RBUTTON) & 0x8000)) return true;
         if (Config::aimlockOnLeftMouse && (GetAsyncKeyState(VK_LBUTTON) & 0x8000)) return true;
@@ -141,7 +139,7 @@ namespace Aimbot {
     static void DoAimlock() {
         if (!Config::aimlockEnabled) return;
 
-        // ★ Çoklu tetik kontrolü
+        // Çoklu tetik kontrolü
         if (!IsAimlockTriggerDown()) {
             s_lockedTarget = 0;
             return;

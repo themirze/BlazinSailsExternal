@@ -84,7 +84,7 @@ namespace Theme {
 
     // Simple checkbox replacement with accent color
     inline void Toggle(const char* label, bool* v) {
-        ImGui::PushID(v);          // ★ pointer'ı ID olarak kullan — unique
+        ImGui::PushID(v);          // pointer'ı ID olarak kullan — unique
         ImGui::Checkbox(label, v);
         ImGui::PopID();
     }
